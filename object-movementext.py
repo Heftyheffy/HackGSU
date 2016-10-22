@@ -84,28 +84,36 @@ while True:
 		M = cv2.moments(c)
 		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 		cv2.drawContours(frame,c,-1,(0,255,0),3)
+		isOnScreen = True
 		
-		c2 = max(cnts2, key=cv2.contourArea)
+		try:
+			c2 = max(cnts2, key=cv2.contourArea)
+		except:
+			isOnScreen = False
+		if isOnScreen:
+			M2 = cv2.moments(c2)
+			center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
+			cv2.drawContours(frame,c2,-1,(0,255,0),3)
+			# only proceed if the radius meets a minimum size
+			if radius > 10:
+				# draw the circle and centroid on the frame,
+				# then update the list of tracked points
 
-		M2 = cv2.moments(c2)
-		center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
-		cv2.drawContours(frame,c2,-1,(0,255,0),3)
-		# only proceed if the radius meets a minimum size
-		if radius > 10:
-			# draw the circle and centroid on the frame,
-			# then update the list of tracked points
-
-			cv2.circle(frame, center, 5, (0, 0, 255), -1)
-			pts.appendleft(center)
-			
-			cv2.circle(frame, center2, 5, (0, 0, 255), -1)
-			pts.appendleft(center2)
+				cv2.circle(frame, center, 5, (0, 0, 255), -1)
+				pts.appendleft(center)
+				
+				cv2.circle(frame, center2, 5, (0, 0, 255), -1)
+				pts.appendleft(center2)
 
 	# loop over the set of tracked points
 	for i in np.arange(1, len(pts)):
 		# if either of the tracked points are None, ignore
 		# them
 		if pts[i - 1] is None or pts[i] is None:
+			continue
+		try:
+			a = pts[-10]
+		except:
 			continue
 
 		# check to see if enough points have been accumulated in
