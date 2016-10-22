@@ -16,7 +16,7 @@ args = vars(ap.parse_args())
 # define the lower and upper boundaries of the "green"
 # ball in the HSV color space
 blueLower = (100, 50, 50)
-blueUpper = (150, 255, 150)
+blueUpper = (150, 255, 200)
 
 redLower = (150, 70, 50)
 redUpper = (200, 255, 200)
@@ -82,18 +82,31 @@ while True:
 		c = max(cnts, key=cv2.contourArea)		
 		((x, y), radius) = cv2.minEnclosingCircle(c)
 		M = cv2.moments(c)
-		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+		centerX = int(M["m10"] / M["m00"])
+		centerY = int(M["m01"] / M["m00"])
+		center = (centerX, centerY)
 		cv2.drawContours(frame,c,-1,(0,255,0),3)
+
+		if centerX < 5 or centerX > 580 or centerY > 440 or centerY < 10:
+			s = "dx: ", centerX, ', dy: ', centerY
+			print s
+			
 		isOnScreen = True
-		
+		 
 		try:
 			c2 = max(cnts2, key=cv2.contourArea)
 		except:
 			isOnScreen = False
 		if isOnScreen:
 			M2 = cv2.moments(c2)
-			center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
+			center2X = int(M2["m10"] / M2["m00"])
+			center2Y = int(M2["m01"] / M2["m00"])
+			center2 = (center2X, center2Y )
 			cv2.drawContours(frame,c2,-1,(0,255,0),3)
+			
+			if centerX < 5 or centerX > 580 or centerY > 440 or centerY < 10:
+				s = "dx: ", center2X, ', dy: ', center2Y
+				print s
 			# only proceed if the radius meets a minimum size
 			if radius > 10:
 				# draw the circle and centroid on the frame,
@@ -125,24 +138,8 @@ while True:
 			dX = pts[-10][0] - pts[i][0]
 			dY = pts[-10][1] - pts[i][1]
 			(dirX, dirY) = ("", "")
+			
 
-			# ensure there is significant movement in the
-			# x-direction
-			if np.abs(dX) > 20:
-				dirX = "East" if np.sign(dX) == 1 else "West"
-
-			# ensure there is significant movement in the
-			# y-direction
-			if np.abs(dY) > 20:
-				dirY = "North" if np.sign(dY) == 1 else "South"
-
-			# handle when both directions are non-empty
-			if dirX != "" and dirY != "":
-				direction = "{}-{}".format(dirY, dirX)
-
-			# otherwise, only one direction is non-empty
-			else:
-				direction = dirX if dirX != "" else dirY
 
 		# otherwise, compute the thickness of the line and
 		# draw the connecting lines
